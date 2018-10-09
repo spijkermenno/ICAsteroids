@@ -10,6 +10,9 @@ import java.util.Random;
 /* Author: Menno Spijker | Date last edit: 8 October 2018 */
 /* Github Repository: https://github.com/spijkermenno/ICAsteroids */
 
+/**
+ * The type Ic astroids.
+ */
 public class ICAstroids extends GameEngine {
 
     private Player player;
@@ -20,6 +23,11 @@ public class ICAstroids extends GameEngine {
     private int loop = 0;
 
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
         ICAstroids icAstroids = new ICAstroids();
         icAstroids.runSketch();
@@ -75,7 +83,15 @@ public class ICAstroids extends GameEngine {
         addGameObject(player, ((screensize[0] - player.getWidth()) / 2), (screensize[1] - 150));
     }
 
-    // functions to properly load sprites
+    /**
+     * Load sprite sprite.
+     *
+     * @param filename the filename
+     * @param width    the width
+     * @param height   the height
+     * @return the sprite
+     */
+// functions to properly load sprites
     // ability to resize the sprite.
     public Sprite loadSprite(String filename, int width, int height) {
         Sprite sprite = new Sprite(this.loadImage(ICAstroids.MEDIA_URL.concat(filename)));
@@ -83,6 +99,12 @@ public class ICAstroids extends GameEngine {
         return sprite;
     }
 
+    /**
+     * Load sprite sprite.
+     *
+     * @param filename the filename
+     * @return the sprite
+     */
     public Sprite loadSprite(String filename) {
         Sprite sprite = new Sprite(this.loadImage(ICAstroids.MEDIA_URL.concat(filename)));
         return sprite;

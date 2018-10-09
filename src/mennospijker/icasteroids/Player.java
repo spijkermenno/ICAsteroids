@@ -2,12 +2,20 @@ package mennospijker.icasteroids;
 
 import nl.han.ica.oopg.objects.AnimatedSpriteObject;
 
+/**
+ * The type Player.
+ */
 public class Player extends AnimatedSpriteObject {
     private ICAstroids world;
     private int size, frame = 0, loop = 0;
     private boolean left, right, shoot;
     private final int speed = 5;
 
+    /**
+     * Instantiates a new Player.
+     *
+     * @param world the world
+     */
     Player(ICAstroids world) {
         super(world.loadSprite("spaceshipFly.png"), 2);
         setCurrentFrameIndex(1);
@@ -100,6 +108,11 @@ public class Player extends AnimatedSpriteObject {
 
     }
 
+    /**
+     * Get location int [ ].
+     *
+     * @return the int [ ]
+     */
     int[] getLocation(){
         int[] playerLocation = new int[2];
         playerLocation[0] = (int) getCenterX() - (int) (this.size / 2) - 20;
