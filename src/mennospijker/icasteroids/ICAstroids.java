@@ -6,6 +6,8 @@ import nl.han.ica.oopg.view.View;
 
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /* Author: Menno Spijker | Date last edit: 8 October 2018 */
 /* Github Repository: https://github.com/spijkermenno/ICAsteroids */
@@ -18,9 +20,16 @@ public class ICAstroids extends GameEngine {
     private Player player;
     private int[] screensize = new int[]{850, 750};
     private static String MEDIA_URL = "src/mennospijker/icasteroids/media/";
-    private ArrayList<Asteroid> asteroids = new ArrayList<>();
+    /**
+     * The Asteroids.
+     */
+    public ArrayList<Asteroid> asteroids = new ArrayList<>();
     private Random rand = new Random();
     private int loop = 0;
+    /**
+     * The Timer.
+     */
+    public Timer timer;
 
 
     /**
@@ -33,44 +42,57 @@ public class ICAstroids extends GameEngine {
         icAstroids.runSketch();
     }
 
-    // necessary to prevent big error.
     public void settings() {
         size(screensize[0], screensize[1]);
     }
 
     public void setupGame() {
-        frameRate(60);
+        frameRate(30);
         setFPSCounter(true);
 
         createObjects();
         createViewWithoutViewport(screensize[0], screensize[1]);
+        setAsteroidTimer();
     }
+
+    private void setAsteroidTimer() {
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                createAsteroid();
+            }
+        }, 1000, 1000);
+    }
+
+    private void createAsteroid() {
+        int x = (int) (Math.random() * screensize[0] - 20 + 20);
+        int y = 1;
+        Asteroid a = new SmallAsteroid(this, x, y);
+        asteroids.add(a);
+        addGameObject(a, x, y);
+    }
+
 
     public void update() {
-        int[] playerlocation = player.getLocation();
+        if (this.getThreadState()) {
+            timer.cancel();
+        }
 
-        if (asteroids.size() > 0) {
+        boolean deleteFirstAsteroid = false;
 
-            for (Asteroid a : asteroids) {
-                if (a.getCenterX() >= playerlocation[0] && a.getCenterX() <= playerlocation[1] && a.getY() == player.getY()) {
-                    stop();
-                }
-            }
-
-            if (asteroids.get(0).getY() > screensize[1]) {
-                asteroids.remove(0);
+        for (Asteroid a : asteroids) {
+            if (a.getY() > screensize[1]) {
+                deleteFirstAsteroid = true;
             }
         }
 
-        if (loop == 25) {
-            Asteroid a = new Asteroid(this);
-            asteroids.add(a);
-            addGameObject(a, (int) (Math.random() * screensize[0] - 20 + 20), 20);
-            loop = 0;
-            return;
+        if (deleteFirstAsteroid){
+            asteroids.remove(0);
         }
-        loop++;
+
     }
+
 
     private void createViewWithoutViewport(int screenWidth, int screenHeight) {
         View view = new View(screenWidth, screenHeight);
@@ -79,8 +101,14 @@ public class ICAstroids extends GameEngine {
     }
 
     private void createObjects() {
-        player = new Player(this);
-        addGameObject(player, ((screensize[0] - player.getWidth()) / 2), (screensize[1] - 150));
+        int x = (int) 0;
+        int y = (screensize[1] - 150);
+
+        player = new Player(this, x, y);
+        x = (int) ((screensize[0] - player.getWidth()) / 2);
+        player.setX(x);
+        player.setDefault(x, y);
+        addGameObject(player, x, y);
     }
 
     /**
@@ -91,8 +119,6 @@ public class ICAstroids extends GameEngine {
      * @param height   the height
      * @return the sprite
      */
-// functions to properly load sprites
-    // ability to resize the sprite.
     public Sprite loadSprite(String filename, int width, int height) {
         Sprite sprite = new Sprite(this.loadImage(ICAstroids.MEDIA_URL.concat(filename)));
         sprite.resize(width, height);
@@ -108,5 +134,14 @@ public class ICAstroids extends GameEngine {
     public Sprite loadSprite(String filename) {
         Sprite sprite = new Sprite(this.loadImage(ICAstroids.MEDIA_URL.concat(filename)));
         return sprite;
+    }
+
+
+    public void resetGame() {
+        for (Asteroid a : asteroids) {
+            deleteGameObject(a);
+        }
+        asteroids.clear();
+        player.reset();
     }
 }
