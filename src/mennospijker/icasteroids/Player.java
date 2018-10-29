@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class Player extends AnimatedSpriteObject implements ICollidableWithGameObjects {
     private ICAstroids world;
-    private int size, DefaultX, DefaultY;
+    private int size, DefaultX, DefaultY, points = 0;
     private boolean left, right, shoot;
     private final int speed = 5;
     ArrayList<Weapon> laserBeams = new ArrayList<>();
@@ -68,10 +68,14 @@ public class Player extends AnimatedSpriteObject implements ICollidableWithGameO
         }
 
         if (shoot) {
-            if (laserBeams.size() < 10) {
-                Laser l = new Laser(world, this, (int) (getCenterX() - 5), (int) getCenterY());
-                laserBeams.add(l);
-                world.addGameObject(l, (getCenterX() - 5), getCenterY());
+            if (!world.getGameState()){
+                world.startGame();;
+            }else {
+                if (laserBeams.size() < 10) {
+                    RedLaser l = new RedLaser(world, this, (int) (getCenterX() - 5), (int) getCenterY());
+                    laserBeams.add(l);
+                    world.addGameObject(l, (getCenterX() - 5), getCenterY());
+                }
             }
             shoot = false;
         }
@@ -135,11 +139,10 @@ public class Player extends AnimatedSpriteObject implements ICollidableWithGameO
     public void gameObjectCollisionOccurred(List<GameObject> list) {
         for (GameObject g : list) {
             if (g instanceof Asteroid) {
-                world.resetGame();
+                world.stopGame();
             }
         }
     }
-
     void reset() {
         setX(DefaultX);
         setY(DefaultY);
@@ -147,5 +150,29 @@ public class Player extends AnimatedSpriteObject implements ICollidableWithGameO
             world.deleteGameObject(l);
         }
         laserBeams.clear();
+        points = 0;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public void addPoints(int points){
+        if (this.points == 0){
+            setPoints(points);
+        }else {
+            this.points += points;
+        }
+    }
+
+    int getPoints(){
+        if (this.points == 0) {
+            return 0;
+        }
+        return this.points;
+    }
+
+    public void removeLaserBeam(RedLaser redLaser) {
+        this.laserBeams.remove(redLaser);
     }
 }

@@ -1,5 +1,6 @@
 package mennospijker.icasteroids;
 
+import nl.han.ica.oopg.dashboard.Dashboard;
 import nl.han.ica.oopg.engine.GameEngine;
 import nl.han.ica.oopg.objects.Sprite;
 import nl.han.ica.oopg.view.View;
@@ -18,18 +19,15 @@ import java.util.TimerTask;
 public class ICAstroids extends GameEngine {
 
     private Player player;
-    private int[] screensize = new int[]{850, 750};
+    int[] screensize = new int[]{850, 750};
     private static String MEDIA_URL = "src/mennospijker/icasteroids/media/";
-    /**
-     * The Asteroids.
-     */
-    public ArrayList<Asteroid> asteroids = new ArrayList<>();
+    private ArrayList<Asteroid> asteroids = new ArrayList<>();
     private Random rand = new Random();
     private int loop = 0;
-    /**
-     * The Timer.
-     */
-    public Timer timer;
+    private boolean playing;
+    private Timer timer, secondsTimer;
+    private Dashboard informationBar;
+    private int timeRun = 0;
 
 
     /**
@@ -48,37 +46,101 @@ public class ICAstroids extends GameEngine {
 
     public void setupGame() {
         frameRate(30);
-        setFPSCounter(true);
+        //setFPSCounter(true);
 
         createObjects();
         createViewWithoutViewport(screensize[0], screensize[1]);
-        setAsteroidTimer();
     }
 
-    private void setAsteroidTimer() {
+    int getTime() {
+        return this.timeRun;
+    }
+
+    void startGameTime() {
+        secondsTimer = new Timer();
+        secondsTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                timeRun++;
+            }
+        }, 1000, 1000);
+    }
+
+    void startGame() {
+        this.setAsteroidTimer(1000);
+        this.playing = true;
+        startGameTime();
+    }
+
+    void stopGame() {
+        this.resetGame();
+        this.playing = false;
+        timer.cancel();
+        secondsTimer.cancel();
+        timeRun = 0;
+    }
+
+    boolean getGameState() {
+        return this.playing;
+    }
+
+    public void update() {
+        isGamePaused();
+        astroidInWorld();
+    }
+
+    void setDifficulty() {
+        if (player.getPoints() > 0 && player.getPoints() % 10 == 0) {
+            int speed = 1000 - (player.getPoints() * 3 );
+            setAsteroidTimer(speed);
+        }
+    }
+
+    private void setAsteroidTimer(int time) {
+        if (this.getGameState()) {
+            timer.cancel();
+            System.out.println("timer purged.");
+        }
+
+        System.out.println(time);
         timer = new Timer();
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 createAsteroid();
             }
-        }, 1000, 1000);
+        }, time, time);
     }
 
     private void createAsteroid() {
         int x = (int) (Math.random() * screensize[0] - 20 + 20);
         int y = 1;
-        Asteroid a = new SmallAsteroid(this, x, y);
+
+        int i = rand.nextInt(100);
+        Asteroid a;
+        if (i <= 65) {
+            a = new SmallAsteroid(this, x, y, 2);
+        } else if (i >= 66 && i <= 85) {
+            a = new MediumAsteroid(this, x, y, 2);
+        } else if (i >= 86 && i <= 97) {
+            a = new MediumAsteroid(this, x, y, 1);
+            System.out.println("Large Astroid");
+        } else {
+            a = new MediumAsteroid(this, x, y, 1);
+            System.out.println("Alien Astroid");
+        }
+
         asteroids.add(a);
         addGameObject(a, x, y);
     }
 
-
-    public void update() {
+    private void isGamePaused() {
         if (this.getThreadState()) {
             timer.cancel();
         }
+    }
 
+    private void astroidInWorld() {
         boolean deleteFirstAsteroid = false;
 
         for (Asteroid a : asteroids) {
@@ -87,12 +149,10 @@ public class ICAstroids extends GameEngine {
             }
         }
 
-        if (deleteFirstAsteroid){
+        if (deleteFirstAsteroid) {
             asteroids.remove(0);
         }
-
     }
-
 
     private void createViewWithoutViewport(int screenWidth, int screenHeight) {
         View view = new View(screenWidth, screenHeight);
@@ -101,13 +161,27 @@ public class ICAstroids extends GameEngine {
     }
 
     private void createObjects() {
-        int x = (int) 0;
+        int x = 0;
         int y = (screensize[1] - 150);
 
         player = new Player(this, x, y);
+        informationBar = new informationBar(0, 0, screensize[0], 40);
+
+        informationBar.setBackground(30, 30, 30);
+
+        ScoreCounter scorecounter = new ScoreCounter(this, player);
+        TimeCounter timecounter = new TimeCounter(this, player);
+        LevelCounter levelcounter = new LevelCounter(this, player);
+
+        informationBar.addGameObject(scorecounter);
+        informationBar.addGameObject(timecounter);
+        informationBar.addGameObject(levelcounter);
+
+
         x = (int) ((screensize[0] - player.getWidth()) / 2);
         player.setX(x);
         player.setDefault(x, y);
+        addDashboard(this.informationBar);
         addGameObject(player, x, y);
     }
 
@@ -131,17 +205,16 @@ public class ICAstroids extends GameEngine {
      * @param filename the filename
      * @return the sprite
      */
-    public Sprite loadSprite(String filename) {
+    Sprite loadSprite(String filename) {
         Sprite sprite = new Sprite(this.loadImage(ICAstroids.MEDIA_URL.concat(filename)));
         return sprite;
     }
 
-
-    public void resetGame() {
+    private void resetGame() {
+        player.reset();
         for (Asteroid a : asteroids) {
             deleteGameObject(a);
         }
         asteroids.clear();
-        player.reset();
     }
 }
