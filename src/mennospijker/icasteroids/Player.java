@@ -6,23 +6,37 @@ import nl.han.ica.oopg.objects.GameObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * The type Player.
  */
 public class Player extends AnimatedSpriteObject implements ICollidableWithGameObjects {
+    private Timer timer;
     private ICAstroids world;
     private int size, DefaultX, DefaultY, points = 0;
     private boolean left, right, shoot;
     private final int speed = 5;
+    private String weaponType = "red";
+    private int weaponTypeSet = 0, getWeaponTypeReset = 10;
+    /**
+     * The Laser beams.
+     */
     ArrayList<Weapon> laserBeams = new ArrayList<>();
+    /**
+     * The To delete.
+     */
     ArrayList<Weapon> toDelete = new ArrayList<>();
+    private boolean isTimerSet = false;
 
 
     /**
      * Instantiates a new Player.
      *
      * @param world the world
+     * @param x     the x
+     * @param y     the y
      */
     Player(ICAstroids world, int x, int y) {
         super(world.loadSprite("spaceshipFlyInverse.png"), 2);
@@ -32,7 +46,13 @@ public class Player extends AnimatedSpriteObject implements ICollidableWithGameO
         setFriction(0.1f);
     }
 
-    public void setDefault(int x, int y){
+    /**
+     * Sets default.
+     *
+     * @param x the x
+     * @param y the y
+     */
+    public void setDefault(int x, int y) {
         this.DefaultX = x;
         this.DefaultY = y;
     }
@@ -42,9 +62,37 @@ public class Player extends AnimatedSpriteObject implements ICollidableWithGameO
         checkLocation();
         keyHandler();
         checkLaserPosition();
+        weaponType();
     }
 
-    private void checkLaserPosition(){
+    /**
+     * Sets laser timer.
+     */
+    void setLaserTimer() {
+        if (isTimerSet) {
+            timer.cancel();
+            isTimerSet = false;
+        }
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                weaponTypeSet++;
+            }
+        }, 1000, 1000);
+        isTimerSet = true;
+    }
+
+    private void weaponType() {
+        if (weaponType.equals("blue")) {
+            if (weaponTypeSet > getWeaponTypeReset) {
+                weaponType = "red";
+                timer.cancel();
+            }
+        }
+    }
+
+    private void checkLaserPosition() {
         boolean deleteFirstLaser = false;
 
         for (Weapon l : laserBeams) {
@@ -53,7 +101,7 @@ public class Player extends AnimatedSpriteObject implements ICollidableWithGameO
             }
         }
 
-        if (deleteFirstLaser){
+        if (deleteFirstLaser) {
             laserBeams.remove(0);
         }
     }
@@ -68,11 +116,19 @@ public class Player extends AnimatedSpriteObject implements ICollidableWithGameO
         }
 
         if (shoot) {
-            if (!world.getGameState()){
-                world.startGame();;
-            }else {
+            if (!world.getGameState()) {
+                world.startGame();
+            } else {
                 if (laserBeams.size() < 10) {
-                    RedLaser l = new RedLaser(world, this, (int) (getCenterX() - 5), (int) getCenterY());
+                    Weapon l;
+                    switch (weaponType) {
+                        case "blue":
+                            l = new BlueLaser(world, this, (int) (getCenterX() - 5), (int) getCenterY());
+                            break;
+                        default:
+                            l = new RedLaser(world, this, (int) (getCenterX() - 5), (int) getCenterY());
+                            break;
+                    }
                     laserBeams.add(l);
                     world.addGameObject(l, (getCenterX() - 5), getCenterY());
                 }
@@ -143,36 +199,78 @@ public class Player extends AnimatedSpriteObject implements ICollidableWithGameO
             }
         }
     }
+
+    /**
+     * Reset.
+     */
     void reset() {
         setX(DefaultX);
         setY(DefaultY);
-        for (Weapon l : laserBeams){
+        for (Weapon l : laserBeams) {
             world.deleteGameObject(l);
         }
         laserBeams.clear();
         points = 0;
     }
 
+    /**
+     * Sets points.
+     *
+     * @param points the points
+     */
     public void setPoints(int points) {
         this.points = points;
     }
 
-    public void addPoints(int points){
-        if (this.points == 0){
+    /**
+     * Add points.
+     *
+     * @param points the points
+     */
+    public void addPoints(int points) {
+        if (this.points == 0) {
             setPoints(points);
-        }else {
+        } else {
             this.points += points;
         }
     }
 
-    int getPoints(){
+    /**
+     * Gets points.
+     *
+     * @return the points
+     */
+    int getPoints() {
         if (this.points == 0) {
             return 0;
         }
         return this.points;
     }
 
-    public void removeLaserBeam(RedLaser redLaser) {
-        this.laserBeams.remove(redLaser);
+    /**
+     * Remove laser beam.
+     *
+     * @param laser the laser
+     */
+    public void removeLaserBeam(Weapon laser) {
+        this.laserBeams.remove(laser);
+    }
+
+    /**
+     * Sets laser type.
+     *
+     * @param type the type
+     */
+    public void setLaserType(String type) {
+        switch (type) {
+            case "red":
+                this.weaponType = type;
+                timer.cancel();
+                break;
+            case "blue":
+                this.weaponType = type;
+                setLaserTimer();
+                break;
+        }
     }
 }

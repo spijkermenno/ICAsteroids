@@ -6,17 +6,45 @@ import nl.han.ica.oopg.objects.Sprite;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * The type Asteroid.
+ */
 public abstract class Asteroid extends AnimatedSpriteObject {
 
     private Timer timer;
+    /**
+     * The World.
+     */
     protected ICAstroids world;
-    int frame, timerTime = 250, health, value;
+    /**
+     * The Frame.
+     */
+    int frame, /**
+     * The Timer time.
+     */
+    timerTime = 250, /**
+     * The Health.
+     */
+    health, /**
+     * The Value.
+     */
+    value;
 
+    /**
+     * Instantiates a new Asteroid.
+     *
+     * @param sprite      the sprite
+     * @param totalFrames the total frames
+     * @param world       the world
+     */
     public Asteroid(Sprite sprite, int totalFrames, ICAstroids world) {
         super(sprite, totalFrames);
         this.world = world;
     }
 
+    /**
+     * Sets frame timer.
+     */
     void setFrameTimer() {
         timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -32,24 +60,47 @@ public abstract class Asteroid extends AnimatedSpriteObject {
     }
 
 
+    /**
+     * Is destroyed boolean.
+     *
+     * @return the boolean
+     */
     boolean isDestroyed() {
         return this.health <= 0;
     }
 
-    void hit() {
-        this.health--;
+    /**
+     * Hit.
+     *
+     * @param hitPoints the hit points
+     */
+    void hit(int hitPoints) {
+        this.health = this.health - hitPoints;
     }
 
+    /**
+     * Gets value.
+     *
+     * @return the value
+     */
     int getValue() {
         return this.value;
     }
 
+    /**
+     * Explode.
+     */
     void explode() {
         int x = (int) this.getCenterX();
         int y = (int) this.getCenterY();
         world.addGameObject(new Explosion(world, x, y), x, y);
     }
 
+    /**
+     * Sets timer time.
+     *
+     * @param timerTime the timer time
+     */
     void setTimerTime(int timerTime) {
         this.timerTime = timerTime;
     }

@@ -12,6 +12,7 @@ public class SmallAsteroid extends Asteroid {
      * @param world the world
      * @param x     the x
      * @param y     the y
+     * @param speed the speed
      */
     SmallAsteroid(ICAstroids world, int x, int y, int speed) {
         super(world.loadSprite("spriteSmallAsteroid.png"), 8, world);

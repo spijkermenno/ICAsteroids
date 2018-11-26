@@ -1,15 +1,20 @@
 package mennospijker.icasteroids;
 
-import nl.han.ica.oopg.objects.GameObject;
 import processing.core.PGraphics;
 
-public class ScoreCounter extends GameObject {
-    private Player player;
-    private ICAstroids world;
+/**
+ * The type Score counter.
+ */
+public class ScoreCounter extends Counter {
 
+    /**
+     * Instantiates a new Score counter.
+     *
+     * @param world  the world
+     * @param player the player
+     */
     ScoreCounter (ICAstroids world, Player player){
-        this.player = player;
-        this.world = world;
+        super(world, player);
         setX(25);
         setY(25);
     }

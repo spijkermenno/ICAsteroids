@@ -14,9 +14,10 @@ public class RedLaser extends Weapon {
     /**
      * Instantiates a new Laser.
      *
-     * @param world the world
-     * @param x     the x
-     * @param y     the y
+     * @param world  the world
+     * @param player the player
+     * @param x      the x
+     * @param y      the y
      */
     RedLaser(ICAstroids world, Player player, int x, int y){
         super(world.loadSprite("redLaserBeam.png"), 1);
@@ -25,6 +26,7 @@ public class RedLaser extends Weapon {
         this.player = player;
         this.world = world;
         setDirectionSpeed(0, 5);
+        sound(world);
     }
 
     @Override
@@ -33,14 +35,15 @@ public class RedLaser extends Weapon {
             if (g instanceof Asteroid) {
                 Asteroid asteroid = (Asteroid) g;
 
-                float x = this.getCenterX();
-                float y = this.getCenterY();
-
                 world.deleteGameObject(this);
-                asteroid.hit();
+                asteroid.hit(1);
+                new Sound(world, "hitmarker.mp3");
 
                 if (asteroid.isDestroyed()) {
                     player.addPoints(asteroid.getValue());
+                    if (asteroid instanceof AlienAsteroid){
+                        player.setLaserType("blue");
+                    }
                     asteroid.explode();
                     world.deleteGameObject(g);
                     player.removeLaserBeam(this);

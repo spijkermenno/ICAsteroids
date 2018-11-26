@@ -1,16 +1,21 @@
 package mennospijker.icasteroids;
 
-import nl.han.ica.oopg.objects.GameObject;
 import processing.core.PGraphics;
 
-public class TimeCounter extends GameObject {
-    private final ICAstroids world;
-    private Player player;
+/**
+ * The type Time counter.
+ */
+public class TimeCounter extends Counter {
 
+    /**
+     * Instantiates a new Time counter.
+     *
+     * @param world  the world
+     * @param player the player
+     */
     TimeCounter(ICAstroids world, Player player) {
-        this.player = player;
-        this.world = world;
-        setX((world.screensize[0] / 2) - 25);
+        super(world, player);
+        setX((world.screensize[0] >> 1) - 33);
         setY(25);
     }
 
@@ -27,19 +32,34 @@ public class TimeCounter extends GameObject {
         g.endDraw();
     }
 
-    public String calculateTime(int time){
+    private String calculateTime(int time) {
         int minutes = 0;
-        int seconds = 0;
+        int seconds;
 
-        while( time >= 60){
+        while (time >= 60) {
             minutes++;
             time = time - 60;
         }
 
-        if (time < 60){
-            seconds = time;
+        seconds = time;
+        String timeString = "";
+
+        if (minutes < 10) {
+            timeString += "0".concat(Integer.toString(minutes));
+        } else {
+            timeString += minutes;
         }
 
-        return Integer.toString(minutes) + ":" + Integer.toString(seconds);
+        timeString += ":";
+
+        if (seconds < 10) {
+            timeString += "0".concat(Integer.toString(seconds));
+        } else {
+            timeString += seconds;
+        }
+
+
+
+        return timeString;
     }
 }

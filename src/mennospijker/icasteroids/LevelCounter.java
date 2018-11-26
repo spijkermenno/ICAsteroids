@@ -1,15 +1,20 @@
 package mennospijker.icasteroids;
 
-import nl.han.ica.oopg.objects.GameObject;
 import processing.core.PGraphics;
 
-public class LevelCounter extends GameObject {
-    private final ICAstroids world;
-    private Player player;
+/**
+ * The type Level counter.
+ */
+public class LevelCounter extends Counter {
 
+    /**
+     * Instantiates a new Level counter.
+     *
+     * @param world  the world
+     * @param player the player
+     */
     LevelCounter(ICAstroids world, Player player) {
-        this.world = world;
-        this.player = player;
+        super(world, player);
         setX(world.screensize[0] - 100);
         setY(25);
     }
@@ -23,7 +28,7 @@ public class LevelCounter extends GameObject {
     public void draw(PGraphics g) {
         g.beginDraw();
         g.textSize(20);
-        g.text( "level:" + Integer.toString((int) Math.floor(player.getPoints() / 10)), this.x, this.y);
+        g.text( "level:" + Integer.toString( this.player.getPoints() / 10), this.x, this.y);
         g.endDraw();
     }
 }
